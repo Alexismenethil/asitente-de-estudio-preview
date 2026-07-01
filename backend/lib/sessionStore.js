@@ -1,12 +1,12 @@
 const { randomUUID } = require("crypto");
 
-// Historial de chat en memoria: sessionId -> { fileId, mensajes }
+// Historial de chat en memoria: sessionId -> { fileUri, mimeType, mensajes }
 // No hay persistencia — si el backend se reinicia, las sesiones se pierden.
 const sessions = new Map();
 
-function createSession(fileId) {
+function createSession({ fileUri, mimeType }) {
   const sessionId = randomUUID();
-  sessions.set(sessionId, { fileId, mensajes: [] });
+  sessions.set(sessionId, { fileUri, mimeType, mensajes: [] });
   return sessionId;
 }
 
@@ -14,12 +14,15 @@ function getSession(sessionId) {
   return sessions.get(sessionId);
 }
 
+// El historial se guarda ya en el formato "contents" de Gemini (role/parts,
+// con "model" en vez de "assistant") para poder spread-earlo directo dentro
+// de generateContent() sin transformarlo en cada llamada.
 function appendMessages(sessionId, pregunta, respuesta) {
   const session = sessions.get(sessionId);
   if (!session) return;
   session.mensajes.push(
-    { role: "user", content: pregunta },
-    { role: "assistant", content: respuesta }
+    { role: "user", parts: [{ text: pregunta }] },
+    { role: "model", parts: [{ text: respuesta }] }
   );
 }
 

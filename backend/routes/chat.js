@@ -1,5 +1,5 @@
 const express = require("express");
-const { askTutor } = require("../lib/claudeClient");
+const { askTutor } = require("../lib/aiClient");
 const { getSession, appendMessages } = require("../lib/sessionStore");
 
 const router = express.Router();
@@ -17,7 +17,8 @@ router.post("/", async (req, res, next) => {
     }
 
     const { respuesta, citas } = await askTutor({
-      fileId: session.fileId,
+      fileUri: session.fileUri,
+      mimeType: session.mimeType,
       pregunta,
       historial: session.mensajes,
     });

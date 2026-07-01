@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { uploadPdf } = require("../lib/claudeClient");
+const { uploadPdf } = require("../lib/aiClient");
 const { createSession } = require("../lib/sessionStore");
 
 const router = express.Router();
@@ -21,9 +21,11 @@ router.post("/", upload.single("file"), async (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ error: "No se recibió ningún archivo" });
     }
-    const fileId = await uploadPdf(req.file.buffer, req.file.originalname);
-    const sessionId = createSession(fileId);
-    res.json({ fileId, sessionId });
+    const { uri, mimeType } = await uploadPdf(req.file.buffer, req.file.originalname);
+    const sessionId = createSession({ fileUri: uri, mimeType });
+    // "fileId" se mantiene como nombre de campo por compatibilidad con el
+    // frontend existente, aunque ahora contiene el uri de archivo de Gemini.
+    res.json({ fileId: uri, sessionId });
   } catch (err) {
     next(err);
   }
