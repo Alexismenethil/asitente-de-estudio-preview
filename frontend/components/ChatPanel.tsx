@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type JSX } from "react";
 import { useAppState } from "@/context/AppStateContext";
-import { CloseIcon, SendIcon } from "@/components/icons";
+import { BrandCloudIcon, CloseIcon, SendIcon } from "@/components/icons";
 import { sendChatMessage } from "@/lib/api";
 
 const CITATION_REGEX = /\[pág\.\s*(\d+)\]/g;
@@ -40,6 +40,7 @@ export default function ChatPanel() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const canSend = input.trim().length > 0 && Boolean(sessionId) && !isSending;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -67,14 +68,17 @@ export default function ChatPanel() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f7f3ec]/86 px-5 py-6 backdrop-blur-sm">
-      <section className="flex h-full max-h-[720px] w-full max-w-[430px] flex-col rounded-[34px] bg-white p-6 shadow-[0_28px_80px_rgba(31,35,45,0.14)] ring-1 ring-white/80 sm:p-7">
-        <header className="flex items-center justify-between">
+    <div className="modal-fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#f7f3ec]/86 px-4 py-5 backdrop-blur-sm sm:px-6">
+      <section className="panel-in flex h-full max-h-[780px] w-full max-w-[760px] flex-col rounded-[34px] bg-white p-5 shadow-[0_28px_80px_rgba(31,35,45,0.14)] ring-1 ring-white/80 sm:p-7">
+        <header className="flex items-center justify-between border-b border-[#f1eee8] pb-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0b66c3] text-sm font-semibold text-white shadow-[0_10px_24px_rgba(11,102,195,0.24)]">
-              AI
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e8f1fb] text-[#0b66c3] shadow-[0_10px_24px_rgba(31,35,45,0.06)]">
+              <BrandCloudIcon className="h-6 w-6" />
             </div>
-            <span className="text-[17px] font-semibold text-[#4b5262]">TutorPDF</span>
+            <div>
+              <p className="text-[18px] font-semibold text-[#333844]">TutorPDF</p>
+              <p className="mt-0.5 text-[13px] text-[#8b93a4]">Asistente de estudio</p>
+            </div>
           </div>
           <button
             type="button"
@@ -87,27 +91,35 @@ export default function ChatPanel() {
           </button>
         </header>
 
-        <div ref={scrollRef} className="soft-scrollbar mt-8 flex-1 space-y-4 overflow-y-auto pr-1">
-          <div className="max-w-[84%] rounded-[18px] bg-white px-5 py-4 text-[16px] leading-7 text-[#2e333d] shadow-[0_8px_24px_rgba(31,35,45,0.06)] ring-1 ring-black/[0.03]">
+        <div ref={scrollRef} className="soft-scrollbar flex-1 space-y-4 overflow-y-auto px-1 py-6 sm:px-3">
+          <div className="message-in-left max-w-[88%] rounded-[22px] bg-white px-5 py-4 text-[16px] leading-7 text-[#2e333d] shadow-[0_8px_24px_rgba(31,35,45,0.06)] ring-1 ring-black/[0.03] sm:max-w-[72%]">
             Hola, soy TutorPDF, un asistente de IA que esta listo para ayudar con tu estudio.
           </div>
 
           {mensajes.map((msg, index) => (
             <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[84%] rounded-[18px] px-5 py-4 text-[16px] leading-7 shadow-[0_8px_24px_rgba(31,35,45,0.08)] ${
+                className={`max-w-[88%] rounded-[22px] px-5 py-4 text-[16px] leading-7 shadow-[0_8px_24px_rgba(31,35,45,0.08)] sm:max-w-[72%] ${
                   msg.role === "user" ? "bg-[#0b66c3] text-white" : "bg-white text-[#2e333d] ring-1 ring-black/[0.03]"
-                }`}
+                } ${msg.role === "user" ? "message-in-right" : "message-in-left"}`}
               >
                 {msg.role === "assistant" ? renderWithCitations(msg.content, goToPage) : msg.content}
               </div>
             </div>
           ))}
 
-          {isSending && <p className="text-sm text-[#9aa1af]">Pensando...</p>}
+          {isSending && (
+            <div className="message-in-left flex justify-start">
+              <div className="flex items-center gap-1.5 rounded-full bg-white px-4 py-3 shadow-[0_8px_24px_rgba(31,35,45,0.06)] ring-1 ring-black/[0.03]">
+                <span className="typing-dot h-2 w-2 rounded-full bg-[#9aa1af]" />
+                <span className="typing-dot h-2 w-2 rounded-full bg-[#9aa1af] [animation-delay:140ms]" />
+                <span className="typing-dot h-2 w-2 rounded-full bg-[#9aa1af] [animation-delay:280ms]" />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="mt-5 flex items-center gap-2 rounded-full border border-[#aab3c3] bg-white p-2 shadow-[0_10px_26px_rgba(31,35,45,0.07)]">
+        <div className="flex items-center gap-2 rounded-full border border-[#d6dbe5] bg-white p-2 shadow-[0_10px_26px_rgba(31,35,45,0.07)] transition-all duration-300 ease-[var(--premium-ease)] focus-within:border-[#0b66c3]/50 focus-within:shadow-[0_14px_34px_rgba(11,102,195,0.12)]">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -120,8 +132,8 @@ export default function ChatPanel() {
             aria-label="Enviar"
             title="Enviar"
             onClick={handleSend}
-            disabled={isSending || !sessionId}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b66c3] text-white shadow-[0_10px_24px_rgba(11,102,195,0.24)] transition-all duration-300 ease-[var(--premium-ease)] hover:-translate-y-0.5 hover:bg-[#075cb2] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={!canSend}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b66c3] text-white shadow-[0_10px_24px_rgba(11,102,195,0.24)] transition-all duration-300 ease-[var(--premium-ease)] hover:-translate-y-0.5 hover:bg-[#075cb2] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
           >
             <SendIcon className="h-5 w-5" />
           </button>

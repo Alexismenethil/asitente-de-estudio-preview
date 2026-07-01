@@ -16,7 +16,7 @@ function IconButton({ children, onClick, label }: { children: ReactNode; onClick
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex h-9 w-9 items-center justify-center rounded-full text-[#a9b2c8] transition-colors duration-300 hover:bg-[#eef1f6] hover:text-[#6b7280]"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-[#a9b2c8] transition-all duration-300 ease-[var(--premium-ease)] hover:-translate-y-0.5 hover:bg-[#eef1f6] hover:text-[#6b7280] active:scale-[0.94]"
     >
       {children}
     </button>
@@ -97,7 +97,7 @@ export default function PdfViewer() {
 
         <div className="flex shrink-0 items-center gap-2">
           <p className="hidden text-[15px] text-[#b3bbce] sm:block">
-            Page {currentPage} of {totalPages || "--"}
+            Pagina {currentPage} de {totalPages || "--"}
           </p>
           <IconButton label="Alejar" onClick={() => setZoom((prev) => Math.max(0.8, Number((prev - 0.1).toFixed(2))))}>
             <ZoomOutIcon className="h-5 w-5" />
@@ -129,7 +129,8 @@ export default function PdfViewer() {
                 ref={(el) => {
                   pageRefs.current[pageNumber] = el;
                 }}
-                className="mb-7 flex justify-center last:mb-0"
+                className="page-in mb-7 flex justify-center last:mb-0"
+                style={{ animationDelay: `${Math.min(index * 45, 240)}ms` }}
               >
                 <Page pageNumber={pageNumber} width={pageWidth} />
               </div>

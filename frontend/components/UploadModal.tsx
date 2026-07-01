@@ -52,11 +52,12 @@ export default function UploadModal() {
   function onSelectFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
+    e.target.value = "";
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-8">
-      <section className="relative w-full max-w-[430px] rounded-[34px] bg-white px-7 py-9 text-center shadow-[0_28px_80px_rgba(31,35,45,0.11)] ring-1 ring-white/80 sm:px-9 sm:py-11">
+      <section className="panel-in relative w-full max-w-[430px] rounded-[34px] bg-white px-7 py-9 text-center shadow-[0_28px_80px_rgba(31,35,45,0.11)] ring-1 ring-white/80 sm:px-9 sm:py-11">
         <div className="mx-auto flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#e8f1fb] text-[#0b66c3]">
           <BrandCloudIcon className="h-9 w-9" />
         </div>
@@ -72,7 +73,9 @@ export default function UploadModal() {
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           className={`mt-8 flex min-h-[168px] flex-col items-center justify-center rounded-[24px] border-2 border-dashed px-6 py-8 transition-all duration-500 ease-[var(--premium-ease)] ${
-            isDragging ? "border-[#0b66c3] bg-[#edf5ff]" : "border-[#c8d0e2] bg-white"
+            isDragging
+              ? "scale-[1.015] border-[#0b66c3] bg-[#edf5ff] shadow-[0_14px_36px_rgba(11,102,195,0.1)]"
+              : "border-[#c8d0e2] bg-white hover:border-[#aeb9cd]"
           }`}
         >
           <DocumentIcon className="h-9 w-9 text-[#7b8394]" />
