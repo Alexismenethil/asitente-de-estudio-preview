@@ -18,8 +18,14 @@ interface AppState {
   setSessionId: (id: string | null) => void;
   targetPage: number | null;
   goToPage: (page: number) => void;
+  clearTargetPage: () => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
+  setTotalPages: (pages: number) => void;
   mensajes: ChatMessage[];
   setMensajes: Dispatch<SetStateAction<ChatMessage[]>>;
+  resetStudyState: () => void;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -29,6 +35,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [targetPage, setTargetPage] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [mensajes, setMensajes] = useState<ChatMessage[]>([]);
 
   // Cruza el límite entre pestañas: usado por las citas [pág. N] del chat
@@ -36,6 +44,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   function goToPage(page: number) {
     setActiveView("content");
     setTargetPage(page);
+  }
+
+  function clearTargetPage() {
+    setTargetPage(null);
+  }
+
+  function resetStudyState() {
+    setPdfFile(null);
+    setSessionId(null);
+    setTargetPage(null);
+    setCurrentPage(1);
+    setTotalPages(0);
+    setMensajes([]);
   }
 
   return (
@@ -49,8 +70,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         setSessionId,
         targetPage,
         goToPage,
+        clearTargetPage,
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        setTotalPages,
         mensajes,
         setMensajes,
+        resetStudyState,
       }}
     >
       {children}

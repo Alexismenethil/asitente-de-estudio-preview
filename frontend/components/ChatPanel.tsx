@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState, type JSX } from "react";
 import { useAppState } from "@/context/AppStateContext";
+import { CloseIcon, SendIcon } from "@/components/icons";
 import { sendChatMessage } from "@/lib/api";
 
 const CITATION_REGEX = /\[pág\.\s*(\d+)\]/g;
 
-// Convierte "... [pág. 4] ..." en texto intercalado con botones clicables.
 function renderWithCitations(text: string, onCiteClick: (page: number) => void) {
   const parts: (string | JSX.Element)[] = [];
   let lastIndex = 0;
@@ -22,7 +22,7 @@ function renderWithCitations(text: string, onCiteClick: (page: number) => void) 
       <button
         key={`${match.index}-${page}`}
         onClick={() => onCiteClick(page)}
-        className="mx-0.5 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-200"
+        className="mx-0.5 rounded bg-[#e9f2ff] px-1.5 py-0.5 text-xs font-medium text-[#0b66c3] transition-colors hover:bg-[#dcecff]"
       >
         [pág. {page}]
       </button>
@@ -59,7 +59,7 @@ export default function ChatPanel() {
     } catch (err) {
       setMensajes((prev) => [
         ...prev,
-        { role: "assistant", content: "Ocurrió un error al procesar tu pregunta. Intenta de nuevo." },
+        { role: "assistant", content: "Ocurrio un error al procesar tu pregunta. Intenta de nuevo." },
       ]);
     } finally {
       setIsSending(false);
@@ -67,52 +67,66 @@ export default function ChatPanel() {
   }
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-white">
-      <div className="flex items-center justify-between border-b p-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-            AI
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f7f3ec]/86 px-5 py-6 backdrop-blur-sm">
+      <section className="flex h-full max-h-[720px] w-full max-w-[430px] flex-col rounded-[34px] bg-white p-6 shadow-[0_28px_80px_rgba(31,35,45,0.14)] ring-1 ring-white/80 sm:p-7">
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0b66c3] text-sm font-semibold text-white shadow-[0_10px_24px_rgba(11,102,195,0.24)]">
+              AI
+            </div>
+            <span className="text-[17px] font-semibold text-[#4b5262]">TutorPDF</span>
           </div>
-          <span className="font-semibold text-gray-900">TutorPDF</span>
-        </div>
-        <button onClick={() => setActiveView("content")} className="text-gray-400 hover:text-gray-600">
-          ✕
-        </button>
-      </div>
-
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-        <div className="max-w-[80%] rounded-2xl bg-gray-100 p-3 text-sm text-gray-800">
-          Hola, soy TutorPDF, un asistente de IA que está listo para ayudar con tu estudio.
-        </div>
-        {mensajes.map((msg, i) => (
-          <div
-            key={i}
-            className={`max-w-[80%] rounded-2xl p-3 text-sm ${
-              msg.role === "user" ? "ml-auto bg-blue-600 text-white" : "bg-gray-100 text-gray-800"
-            }`}
+          <button
+            type="button"
+            aria-label="Cerrar asistente"
+            title="Cerrar"
+            onClick={() => setActiveView("content")}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-[#7b8394] transition-colors hover:bg-[#f3f4f7] hover:text-[#333844]"
           >
-            {msg.role === "assistant" ? renderWithCitations(msg.content, goToPage) : msg.content}
-          </div>
-        ))}
-        {isSending && <div className="text-xs text-gray-400">Pensando...</div>}
-      </div>
+            <CloseIcon className="h-5 w-5" />
+          </button>
+        </header>
 
-      <div className="flex items-center gap-2 border-t p-4">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Escribe tu duda aquí..."
-          className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleSend}
-          disabled={isSending}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          ➤
-        </button>
-      </div>
+        <div ref={scrollRef} className="soft-scrollbar mt-8 flex-1 space-y-4 overflow-y-auto pr-1">
+          <div className="max-w-[84%] rounded-[18px] bg-white px-5 py-4 text-[16px] leading-7 text-[#2e333d] shadow-[0_8px_24px_rgba(31,35,45,0.06)] ring-1 ring-black/[0.03]">
+            Hola, soy TutorPDF, un asistente de IA que esta listo para ayudar con tu estudio.
+          </div>
+
+          {mensajes.map((msg, index) => (
+            <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[84%] rounded-[18px] px-5 py-4 text-[16px] leading-7 shadow-[0_8px_24px_rgba(31,35,45,0.08)] ${
+                  msg.role === "user" ? "bg-[#0b66c3] text-white" : "bg-white text-[#2e333d] ring-1 ring-black/[0.03]"
+                }`}
+              >
+                {msg.role === "assistant" ? renderWithCitations(msg.content, goToPage) : msg.content}
+              </div>
+            </div>
+          ))}
+
+          {isSending && <p className="text-sm text-[#9aa1af]">Pensando...</p>}
+        </div>
+
+        <div className="mt-5 flex items-center gap-2 rounded-full border border-[#aab3c3] bg-white p-2 shadow-[0_10px_26px_rgba(31,35,45,0.07)]">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Escribe tu duda aqui..."
+            className="min-w-0 flex-1 bg-transparent px-4 py-3 text-[16px] text-[#333844] outline-none placeholder:text-[#9aa1af]"
+          />
+          <button
+            type="button"
+            aria-label="Enviar"
+            title="Enviar"
+            onClick={handleSend}
+            disabled={isSending || !sessionId}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b66c3] text-white shadow-[0_10px_24px_rgba(11,102,195,0.24)] transition-all duration-300 ease-[var(--premium-ease)] hover:-translate-y-0.5 hover:bg-[#075cb2] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <SendIcon className="h-5 w-5" />
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

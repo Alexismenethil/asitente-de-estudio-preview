@@ -2,12 +2,13 @@
 
 import { useRef, useState } from "react";
 import { useAppState } from "@/context/AppStateContext";
+import { BrandCloudIcon, DocumentIcon, UploadArrowIcon } from "@/components/icons";
 import { uploadPdf } from "@/lib/api";
 
 const MAX_SIZE = 15 * 1024 * 1024; // 15MB
 
 export default function UploadModal() {
-  const { setPdfFile, setSessionId, setActiveView } = useAppState();
+  const { setPdfFile, setSessionId, setActiveView, setMensajes, setCurrentPage, setTotalPages } = useAppState();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -21,7 +22,7 @@ export default function UploadModal() {
       return;
     }
     if (file.size > MAX_SIZE) {
-      setError("El archivo supera el límite de 15MB");
+      setError("El archivo supera el limite de 15MB");
       return;
     }
 
@@ -30,6 +31,9 @@ export default function UploadModal() {
       const { sessionId } = await uploadPdf(file);
       setPdfFile(file);
       setSessionId(sessionId);
+      setMensajes([]);
+      setCurrentPage(1);
+      setTotalPages(0);
       setActiveView("content");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al subir el archivo");
@@ -51,20 +55,14 @@ export default function UploadModal() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-xl">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
-          <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v9m0-9l-3 3m3-3l3 3"
-            />
-          </svg>
+    <main className="flex min-h-screen items-center justify-center px-5 py-8">
+      <section className="relative w-full max-w-[430px] rounded-[34px] bg-white px-7 py-9 text-center shadow-[0_28px_80px_rgba(31,35,45,0.11)] ring-1 ring-white/80 sm:px-9 sm:py-11">
+        <div className="mx-auto flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#e8f1fb] text-[#0b66c3]">
+          <BrandCloudIcon className="h-9 w-9" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">TutorPDF</h1>
-        <p className="mt-1 text-sm text-gray-500">Asistente de Estudio IA</p>
+
+        <h1 className="mt-7 text-[2rem] font-semibold leading-none text-[#17181c]">TutorPDF</h1>
+        <p className="mt-3 text-[15px] text-[#606778]">Asistente de Estudio IA</p>
 
         <div
           onDragOver={(e) => {
@@ -73,31 +71,36 @@ export default function UploadModal() {
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
-          className={`mt-6 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-8 transition-colors ${
-            isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
+          className={`mt-8 flex min-h-[168px] flex-col items-center justify-center rounded-[24px] border-2 border-dashed px-6 py-8 transition-all duration-500 ease-[var(--premium-ease)] ${
+            isDragging ? "border-[#0b66c3] bg-[#edf5ff]" : "border-[#c8d0e2] bg-white"
           }`}
         >
-          <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <p className="text-sm text-gray-600">Suelta tus materiales de estudio aquí</p>
+          <DocumentIcon className="h-9 w-9 text-[#7b8394]" />
+          <p className="mt-5 text-[15px] leading-6 text-[#555c6d]">Suelta tus materiales de estudio aqui</p>
         </div>
 
-        <div className="my-4 text-xs text-gray-400">o</div>
+        <div className="my-6 flex items-center justify-center gap-4 text-[13px] text-[#9aa1af]">
+          <span className="h-px w-12 bg-[#edf0f4]" />
+          o
+          <span className="h-px w-12 bg-[#edf0f4]" />
+        </div>
 
         <button
           onClick={() => inputRef.current?.click()}
           disabled={isUploading}
-          className="w-full rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          className="mx-auto inline-flex min-h-12 w-full max-w-[260px] items-center justify-center gap-3 rounded-full bg-[#0b66c3] px-5 text-[15px] font-semibold text-white shadow-[0_12px_28px_rgba(11,102,195,0.25)] transition-all duration-300 ease-[var(--premium-ease)] hover:-translate-y-0.5 hover:bg-[#075cb2] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
+          <UploadArrowIcon className="h-5 w-5" />
           {isUploading ? "Subiendo..." : "Seleccionar Archivo"}
         </button>
         <input ref={inputRef} type="file" accept="application/pdf" className="hidden" onChange={onSelectFile} />
 
-        <p className="mt-4 text-xs text-gray-400">Soporta PDF hasta 15MB</p>
+        <p className="mt-6 text-[13px] text-[#a3aabb]">Soporta PDF hasta 15MB</p>
 
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-      </div>
-    </div>
+        {error && (
+          <p className="mt-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+        )}
+      </section>
+    </main>
   );
 }
