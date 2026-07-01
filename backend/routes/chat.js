@@ -19,6 +19,7 @@ router.post("/", async (req, res, next) => {
     const { respuesta, citas } = await askTutor({
       fileUri: session.fileUri,
       mimeType: session.mimeType,
+      textoPlano: session.textoPlano,
       pregunta,
       historial: session.mensajes,
     });
@@ -26,6 +27,9 @@ router.post("/", async (req, res, next) => {
     appendMessages(sessionId, pregunta, respuesta);
     res.json({ respuesta, citas });
   } catch (err) {
+    if (err.isFallbackFailure) {
+      return res.status(503).json({ error: err.message });
+    }
     next(err);
   }
 });
